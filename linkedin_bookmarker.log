@@ -25,3 +25,69 @@
 2025-06-13 02:43:11,003 - linkedin_bookmarker - ERROR - Error processing https://www.linkedin.com/in/linkedinexpert: HTTP 404
 2025-06-13 02:43:29,833 - linkedin_bookmarker - ERROR - Error processing https://www.linkedin.com/in/al-amin-khan-9996152b5: HTTP 999
 2025-06-13 02:43:29,836 - linkedin_bookmarker - INFO - Successfully saved 8 bookmarks to linkedin_bookmarks.html
+2025-06-13 03:00:02,107 - linkedin_bookmarker - INFO - Starting LinkedIn Bookmark Generator
+2025-06-13 03:00:02,108 - linkedin_bookmarker - INFO - Found 10 URLs in text file
+2025-06-13 03:00:02,109 - linkedin_bookmarker - INFO - Processing 10 valid URLs
+2025-06-13 03:00:04,229 - linkedin_bookmarker - WARNING - Rate limited. Waiting 30 seconds...
+2025-06-13 03:01:05,982 - linkedin_bookmarker - ERROR - Error processing https://www.linkedin.com/in/sundarpichai: HTTP 999
+2025-06-13 03:02:01,098 - linkedin_bookmarker - ERROR - Error processing https://www.linkedin.com/in/linkedinexpert: HTTP 404
+2025-06-13 03:02:27,476 - linkedin_bookmarker - INFO - Successfully saved 8 bookmarks to linkedin_bookmarks.html
+2025-06-13 03:02:58,077 - linkedin_bookmarker - INFO - Starting LinkedIn Bookmark Generator
+2025-06-13 03:02:58,079 - linkedin_bookmarker - INFO - Found 10 URLs in text file
+2025-06-13 03:02:58,079 - linkedin_bookmarker - INFO - Processing 10 valid URLs
+2025-06-13 03:03:12,792 - linkedin_bookmarker - ERROR - Error processing https://www.linkedin.com/in/sundarpichai: HTTP 999
+2025-06-13 03:03:34,353 - linkedin_bookmarker - ERROR - Error processing https://www.linkedin.com/in/leslievenetz: HTTP 999
+2025-06-13 03:03:36,471 - linkedin_bookmarker - ERROR - Error processing https://www.linkedin.com/in/linkedinexpert: HTTP 999
+2025-06-13 03:03:39,199 - linkedin_bookmarker - ERROR - Error processing https://www.linkedin.com/in/laurastack: HTTP 999
+2025-06-13 03:03:42,109 - linkedin_bookmarker - ERROR - Error processing https://www.linkedin.com/in/leeodden: HTTP 999
+2025-06-13 03:03:42,129 - linkedin_bookmarker - INFO - Successfully saved 5 bookmarks to linkedin_bookmarks.html
+2025-06-13 03:04:43,672 - linkedin_bookmarker - INFO - Starting LinkedIn Bookmark Generator
+2025-06-13 03:04:43,674 - linkedin_bookmarker - INFO - Found 10 URLs in text file
+2025-06-13 03:04:43,674 - linkedin_bookmarker - INFO - Processing 10 valid URLs
+2025-06-13 03:04:46,423 - linkedin_bookmarker - ERROR - Error processing https://www.linkedin.com/in/andrewng: HTTP 999
+2025-06-13 03:04:49,087 - linkedin_bookmarker - ERROR - Error processing https://www.linkedin.com/in/stephencurry30: HTTP 999
+2025-06-13 03:04:51,726 - linkedin_bookmarker - ERROR - Error processing https://www.linkedin.com/in/sundarpichai: HTTP 999
+2025-06-13 03:04:54,598 - linkedin_bookmarker - ERROR - Error processing https://www.linkedin.com/in/justintrudeau: HTTP 999
+2025-06-13 03:04:57,709 - linkedin_bookmarker - ERROR - Error processing https://www.linkedin.com/in/tmamut: HTTP 999
+2025-06-13 03:05:00,562 - linkedin_bookmarker - ERROR - Error processing https://www.linkedin.com/in/jimsemick: HTTP 999
+2025-06-13 03:05:03,819 - linkedin_bookmarker - ERROR - Error processing https://www.linkedin.com/in/leslievenetz: HTTP 999
+2025-06-13 03:05:05,993 - linkedin_bookmarker - ERROR - Error processing https://www.linkedin.com/in/linkedinexpert: HTTP 999
+2025-06-13 03:05:08,797 - linkedin_bookmarker - ERROR - Error processing https://www.linkedin.com/in/laurastack: HTTP 999
+2025-06-13 03:05:11,890 - linkedin_bookmarker - ERROR - Error processing https://www.linkedin.com/in/leeodden: HTTP 999
+2025-06-13 03:05:11,897 - linkedin_bookmarker - INFO - Successfully saved 0 bookmarks to linkedin_bookmarks.html
+2025-06-13 03:13:34,239 - linkedin_bookmarker - INFO - Starting LinkedIn Bookmark Generator
+2025-06-13 03:13:34,240 - linkedin_bookmarker - INFO - Found 10 URLs in text file
+2025-06-13 03:13:34,240 - linkedin_bookmarker - INFO - Processing 10 valid URLs
+2025-06-13 03:13:36,973 - linkedin_bookmarker - ERROR - Error processing https://www.linkedin.com/in/andrewng: HTTP 999
+2025-06-13 03:13:39,557 - linkedin_bookmarker - ERROR - Error processing https://www.linkedin.com/in/stephencurry30: HTTP 999
+2025-06-13 03:13:42,215 - linkedin_bookmarker - ERROR - Error processing https://www.linkedin.com/in/sundarpichai: HTTP 999
+2025-06-13 03:13:45,182 - linkedin_bookmarker - ERROR - Error processing https://www.linkedin.com/in/justintrudeau: HTTP 999
+2025-06-13 03:13:48,178 - linkedin_bookmarker - ERROR - Error processing https://www.linkedin.com/in/tmamut: HTTP 999
+2025-06-13 03:13:51,045 - linkedin_bookmarker - ERROR - Error processing https://www.linkedin.com/in/jimsemick: HTTP 999
+2025-06-13 03:13:54,015 - linkedin_bookmarker - ERROR - Error processing https://www.linkedin.com/in/leslievenetz: HTTP 999
+2025-06-13 03:13:56,117 - linkedin_bookmarker - ERROR - Error processing https://www.linkedin.com/in/linkedinexpert: HTTP 999
+2025-06-13 03:13:58,887 - linkedin_bookmarker - ERROR - Error processing https://www.linkedin.com/in/laurastack: HTTP 999
+2025-06-13 03:14:01,827 - linkedin_bookmarker - ERROR - Error processing https://www.linkedin.com/in/leeodden: HTTP 999
+2025-06-13 03:14:01,832 - linkedin_bookmarker - INFO - Successfully saved 0 bookmarks to linkedin_bookmarks.html
+2025-06-13 03:23:05,582 - linkedin_bookmarker - INFO - Starting LinkedIn Bookmark Generator
+2025-06-13 03:23:05,583 - linkedin_bookmarker - INFO - Found 10 URLs in text file
+2025-06-13 03:23:05,583 - linkedin_bookmarker - INFO - Processing 10 valid URLs
+2025-06-13 03:23:08,369 - linkedin_bookmarker - ERROR - Error processing https://www.linkedin.com/in/andrewng: HTTP 999
+2025-06-13 03:23:11,110 - linkedin_bookmarker - ERROR - Error processing https://www.linkedin.com/in/stephencurry30: HTTP 999
+2025-06-13 03:23:13,728 - linkedin_bookmarker - ERROR - Error processing https://www.linkedin.com/in/sundarpichai: HTTP 999
+2025-06-13 03:23:16,512 - linkedin_bookmarker - ERROR - Error processing https://www.linkedin.com/in/justintrudeau: HTTP 999
+2025-06-13 03:23:19,500 - linkedin_bookmarker - ERROR - Error processing https://www.linkedin.com/in/tmamut: HTTP 999
+2025-06-13 03:23:22,304 - linkedin_bookmarker - ERROR - Error processing https://www.linkedin.com/in/jimsemick: HTTP 999
+2025-06-13 03:23:25,165 - linkedin_bookmarker - ERROR - Error processing https://www.linkedin.com/in/leslievenetz: HTTP 999
+2025-06-13 03:23:27,255 - linkedin_bookmarker - ERROR - Error processing https://www.linkedin.com/in/linkedinexpert: HTTP 999
+2025-06-13 03:23:29,938 - linkedin_bookmarker - ERROR - Error processing https://www.linkedin.com/in/laurastack: HTTP 999
+2025-06-13 03:23:32,950 - linkedin_bookmarker - ERROR - Error processing https://www.linkedin.com/in/leeodden: HTTP 999
+2025-06-13 03:23:32,954 - linkedin_bookmarker - INFO - Successfully saved 0 bookmarks to linkedin_bookmarks.html
+2025-06-13 03:36:30,883 - linkedin_bookmarker - INFO - Starting LinkedIn Bookmark Generator with anti-bot protection
+2025-06-13 03:36:30,885 - linkedin_bookmarker - INFO - Found 10 URLs in text file
+2025-06-13 03:36:30,885 - linkedin_bookmarker - INFO - Processing 10 valid URLs
+2025-06-13 03:36:30,922 - linkedin_bookmarker - WARNING - Request failed (attempt 1): LinkedIn credentials not configured
+2025-06-13 03:36:30,923 - linkedin_bookmarker - WARNING - Request failed (attempt 2): LinkedIn credentials not configured
+2025-06-13 03:36:30,924 - linkedin_bookmarker - WARNING - Request failed (attempt 3): LinkedIn credentials not configured
+2025-06-13 03:36:30,925 - linkedin_bookmarker - ERROR - Error processing https://www.linkedin.com/in/andrewng: Request failed after 3 attempts: LinkedIn credentials not configured
+2025-06-13 03:36:30,944 - linkedin_bookmarker - ERROR - Fatal error: Request failed after 3 attempts: LinkedIn credentials not configured

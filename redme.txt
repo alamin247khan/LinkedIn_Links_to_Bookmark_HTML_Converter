@@ -1,1 +1,49 @@
-python linkedin_bookmarker.py --input urls.txt --output linkedin_bookmarks.html --skip-errors --delay 2
+python linkedin_bookmarker.py --input urls.txt --output linkedin_bookmarks.html --skip-errors --delay 5
+
+
+
+✅ Usage Steps:
+1. Prepare the Input:
+
+You can use:
+A text file with one LinkedIn URL per line.
+A CSV file with LinkedIn URLs in a specific column (default is "url").
+The clipboard (you can copy LinkedIn URLs directly).
+
+2. Run the Script:
+Navigate to the folder where the script is located and use the following command format:
+
+bash
+Copy
+Edit
+python linkedin_bookmarker.py --input [source] --output [output_file]
+✅ Example Commands:
+From a Text File:
+bash
+Copy
+Edit
+python linkedin_bookmarker.py --input linkedin_urls.txt --output bookmarks.html
+From a CSV File:
+bash
+Copy
+Edit
+python linkedin_bookmarker.py --input linkedin_profiles.csv --csv-column profile_url --output bookmarks.html
+(If your URLs are in a column named profile_url.)
+
+From the Clipboard:
+bash
+Copy
+Edit
+python linkedin_bookmarker.py --input clipboard --output bookmarks.html
+(Copy the URLs first, then run this.)
+
+3. Optional Arguments:
+--delay [seconds]: Set a custom delay between requests.
+--skip-errors: Continue processing even if some URLs fail.
+--show-config: Show the default folder configuration and exit.
+--config [config_file]: Use a custom JSON configuration for folder categorization.
+
+4. Result:
+The generated HTML file (e.g., bookmarks.html) will contain categorized bookmarks.
+You can import this file directly into browsers like Chrome or Firefox to access the organized LinkedIn profiles.
+

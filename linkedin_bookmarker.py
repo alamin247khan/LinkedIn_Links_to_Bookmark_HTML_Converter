@@ -1,31 +1,58 @@
 #!/usr/bin/env python3
 """
-LinkedIn Profile Bookmark Generator
+LinkedIn Profile Bookmark Generator with Anti-Bot Protection
 Converts LinkedIn profile URLs into organized browser bookmarks HTML file.
+Includes proxy rotation, cookie handling, and CAPTCHA solving.
 """
 
 import os
 import sys
 import time
 import json
+import random
 import argparse
-import pyperclip
 import requests
 from bs4 import BeautifulSoup
-from tqdm import tqdm
 from urllib.parse import urlparse, urljoin
 from datetime import datetime
-import pandas as pd
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from tqdm import tqdm
 import logging
-from typing import Dict, List, Tuple, Optional
+from typing import Dict, List, Tuple, Optional, Union
 
 # --- CONFIGURATION ---
-DEFAULT_DELAY = 3  # Conservative delay between requests
+DEFAULT_DELAY = 10  # Conservative delay between requests (seconds)
 DEFAULT_OUTPUT = f'linkedin_bookmarks_{datetime.now().strftime("%Y%m%d_%H%M")}.html'
 DEFAULT_CONFIG = os.path.join(os.path.expanduser("~"), '.linkedin_bookmarker_config.json')
 MAX_RETRIES = 3
-REQUEST_TIMEOUT = 20
+REQUEST_TIMEOUT = 30
 MAX_URLS = 500  # Safety limit for input URLs
+MAX_CONSECUTIVE_FAILURES = 5  # Stop after this many consecutive failures
+
+# Proxy configuration (replace with your own)
+PROXY_LIST = [
+    '123.123.123.123:8000',
+    '111.222.111.222:8080',
+    # Add more proxies here
+]
+
+# User-Agent rotation
+USER_AGENTS = [
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:89.0) Gecko/20100101 Firefox/89.0',
+]
+
+# LinkedIn credentials (for cookie refresh)
+LINKEDIN_EMAIL = os.getenv('LINKEDIN_EMAIL', '')
+LINKEDIN_PASSWORD = os.getenv('LINKEDIN_PASSWORD', '')
+
+# 2Captcha API key (optional)
+CAPTCHA_API_KEY = os.getenv('CAPTCHA_API_KEY', '')
 
 # --- CUSTOM EXCEPTIONS ---
 class LinkedInScraperError(Exception):
@@ -38,6 +65,14 @@ class InvalidURLException(LinkedInScraperError):
 
 class RateLimitException(LinkedInScraperError):
     """Exception for rate limiting"""
+    pass
+
+class BlockedException(LinkedInScraperError):
+    """Exception for when blocked by LinkedIn"""
+    pass
+
+class CaptchaException(LinkedInScraperError):
+    """Exception for CAPTCHA requirements"""
     pass
 
 # --- LOGGING SETUP ---
@@ -69,6 +104,215 @@ def setup_logging() -> logging.Logger:
     return logger
 
 logger = setup_logging()
+
+# --- PROXY MANAGEMENT ---
+class ProxyManager:
+    """Manages proxy rotation and health checks"""
+    def __init__(self, proxy_list: List[str]):
+        self.proxies = proxy_list
+        self.current_proxy = None
+        self.blacklisted = set()
+        
+    def get_proxy(self) -> Dict[str, str]:
+        """Get a random working proxy"""
+        available = [p for p in self.proxies if p not in self.blacklisted]
+        if not available:
+            raise LinkedInScraperError("No available proxies")
+            
+        self.current_proxy = random.choice(available)
+        return {
+            'http': f'http://{self.current_proxy}',
+            'https': f'http://{self.current_proxy}'
+        }
+        
+    def mark_bad(self, proxy: str):
+        """Mark a proxy as bad"""
+        self.blacklisted.add(proxy)
+        logger.warning(f"Proxy blacklisted: {proxy}")
+
+proxy_manager = ProxyManager(PROXY_LIST)
+
+# --- COOKIE MANAGEMENT ---
+class CookieManager:
+    """Manages LinkedIn session cookies"""
+    def __init__(self):
+        self.cookies = {}
+        self.last_refresh = 0
+        
+    def get_cookies(self) -> Dict[str, str]:
+        """Get current cookies or refresh if needed"""
+        if not self.cookies or time.time() - self.last_refresh > 3600:  # Refresh every hour
+            self.refresh_cookies()
+        return self.cookies
+        
+    def refresh_cookies(self):
+        """Refresh LinkedIn session cookies using Selenium"""
+        if not LINKEDIN_EMAIL or not LINKEDIN_PASSWORD:
+            raise LinkedInScraperError("LinkedIn credentials not configured")
+            
+        logger.info("Refreshing LinkedIn cookies...")
+        
+        chrome_options = Options()
+        chrome_options.add_argument("--headless")
+        chrome_options.add_argument("--disable-gpu")
+        chrome_options.add_argument("--window-size=1920,1080")
+        chrome_options.add_argument(f"user-agent={random.choice(USER_AGENTS)}")
+        
+        try:
+            driver = webdriver.Chrome(options=chrome_options)
+            driver.get("https://www.linkedin.com/login")
+            
+            # Fill login form
+            WebDriverWait(driver, 20).until(
+                EC.presence_of_element_located((By.ID, "username"))
+            ).send_keys(LINKEDIN_EMAIL)
+            
+            driver.find_element(By.ID, "password").send_keys(LINKEDIN_PASSWORD)
+            driver.find_element(By.XPATH, "//button[@type='submit']").click()
+            
+            # Wait for login to complete
+            WebDriverWait(driver, 30).until(
+                EC.presence_of_element_located((By.XPATH, "//input[@role='combobox' and @aria-label='Search']"))
+            )
+            
+            # Get cookies
+            self.cookies = {c['name']: c['value'] for c in driver.get_cookies()}
+            self.last_refresh = time.time()
+            logger.info("Successfully refreshed cookies")
+            
+        except Exception as e:
+            logger.error(f"Failed to refresh cookies: {str(e)}")
+            raise LinkedInScraperError(f"Cookie refresh failed: {str(e)}")
+            
+        finally:
+            if 'driver' in locals():
+                driver.quit()
+
+cookie_manager = CookieManager()
+
+# --- CAPTCHA SOLVING ---
+class CaptchaSolver:
+    """Handles CAPTCHA solving using 2Captcha service"""
+    def __init__(self, api_key: str):
+        self.api_key = api_key
+        
+    def solve_recaptcha(self, site_key: str, page_url: str) -> Optional[str]:
+        """Solve reCAPTCHA using 2Captcha API"""
+        if not self.api_key:
+            return None
+            
+        submit_url = "http://2captcha.com/in.php"
+        data = {
+            'key': self.api_key,
+            'method': 'userrecaptcha',
+            'googlekey': site_key,
+            'pageurl': page_url,
+            'json': 1
+        }
+        
+        try:
+            # Submit CAPTCHA for solving
+            response = requests.post(submit_url, data=data, timeout=60).json()
+            if response.get('status') != 1:
+                logger.error(f"CAPTCHA submission failed: {response.get('error_text')}")
+                return None
+                
+            captcha_id = response['request']
+            logger.info(f"CAPTCHA submitted, ID: {captcha_id}")
+            
+            # Check for solution
+            result_url = f"http://2captcha.com/res.php?key={self.api_key}&action=get&id={captcha_id}&json=1"
+            for _ in range(30):  # Wait up to 3 minutes
+                time.sleep(6)
+                result = requests.get(result_url, timeout=30).json()
+                if result.get('status') == 1:
+                    return result['request']
+                elif result.get('request') == 'CAPCHA_NOT_READY':
+                    continue
+                else:
+                    logger.error(f"CAPTCHA solving failed: {result.get('error_text')}")
+                    return None
+                    
+        except Exception as e:
+            logger.error(f"CAPTCHA solving error: {str(e)}")
+            
+        return None
+
+captcha_solver = CaptchaSolver(CAPTCHA_API_KEY)
+
+# --- REQUEST MANAGEMENT ---
+def make_request(url: str) -> requests.Response:
+    """
+    Make a request with anti-bot protection measures
+    Args:
+        url: URL to request
+    Returns:
+        Response object
+    """
+    headers = {
+        'User-Agent': random.choice(USER_AGENTS),
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.5',
+        'Accept-Encoding': 'gzip, deflate, br',
+        'Connection': 'keep-alive',
+        'Referer': 'https://www.google.com/',
+        'Upgrade-Insecure-Requests': '1',
+        'Sec-Fetch-Dest': 'document',
+        'Sec-Fetch-Mode': 'navigate',
+        'Sec-Fetch-Site': 'none',
+        'Sec-Fetch-User': '?1',
+        'Cache-Control': 'max-age=0',
+    }
+    
+    for attempt in range(MAX_RETRIES):
+        try:
+            proxy = proxy_manager.get_proxy()
+            cookies = cookie_manager.get_cookies()
+            
+            # Random delay to mimic human behavior
+            time.sleep(random.uniform(DEFAULT_DELAY, DEFAULT_DELAY * 1.5))
+            
+            response = requests.get(
+                url,
+                headers=headers,
+                cookies=cookies,
+                proxies=proxy,
+                timeout=REQUEST_TIMEOUT,
+                allow_redirects=True
+            )
+            
+            # Check for blocking
+            if response.status_code == 999:
+                proxy_manager.mark_bad(proxy_manager.current_proxy)
+                raise RateLimitException("LinkedIn rate limit (HTTP 999)")
+                
+            if "security check" in response.text.lower():
+                raise BlockedException("LinkedIn security check detected")
+                
+            if "captcha" in response.text.lower():
+                raise CaptchaException("CAPTCHA required")
+                
+            if response.status_code != 200:
+                raise LinkedInScraperError(f"HTTP {response.status_code}")
+                
+            return response
+            
+        except (requests.exceptions.ProxyError, requests.exceptions.ConnectionError):
+            proxy_manager.mark_bad(proxy_manager.current_proxy)
+            logger.warning(f"Proxy failed, trying another... (attempt {attempt + 1})")
+            
+        except (RateLimitException, BlockedException, CaptchaException) as e:
+            logger.warning(f"Blocked detected: {str(e)}")
+            time.sleep(random.uniform(30, 60))  # Longer delay when blocked
+            if attempt == MAX_RETRIES - 1:
+                raise
+                
+        except Exception as e:
+            logger.warning(f"Request failed (attempt {attempt + 1}): {str(e)}")
+            if attempt == MAX_RETRIES - 1:
+                raise LinkedInScraperError(f"Request failed after {MAX_RETRIES} attempts: {str(e)}")
+    
+    raise LinkedInScraperError("Max retries exceeded")
 
 # --- URL HANDLING ---
 def validate_linkedin_url(url: str) -> bool:
@@ -140,6 +384,7 @@ def get_urls_from_source(source: str, csv_column: str = 'url') -> List[str]:
     """
     if source.lower() == 'clipboard':
         try:
+            import pyperclip
             text = pyperclip.paste()
             urls = [clean_url(line) for line in text.splitlines() if line.strip()]
             logger.info(f"Found {len(urls)} URLs in clipboard")
@@ -154,6 +399,7 @@ def get_urls_from_source(source: str, csv_column: str = 'url') -> List[str]:
         
         if source.lower().endswith('.csv'):
             try:
+                import pandas as pd
                 df = pd.read_csv(source)
                 if csv_column not in df.columns:
                     raise ValueError(f"Column '{csv_column}' not found in CSV")
@@ -175,58 +421,27 @@ def get_urls_from_source(source: str, csv_column: str = 'url') -> List[str]:
         raise LinkedInScraperError(f"Failed to process input: {str(e)}")
 
 # --- PROFILE SCRAPING ---
-def fetch_profile_data(url: str, retries: int = MAX_RETRIES) -> Tuple[Optional[Dict], Optional[str]]:
+def fetch_profile_data(url: str) -> Tuple[Optional[Dict], Optional[str]]:
     """
-    Fetch and parse LinkedIn profile data
+    Fetch and parse LinkedIn profile data with anti-bot measures
     Args:
         url: LinkedIn profile URL
-        retries: Number of retry attempts
     Returns:
         Tuple: (profile_data, error_message)
     """
-    headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-        'Accept-Language': 'en-US,en;q=0.9',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8'
-    }
-    
-    for attempt in range(retries):
-        try:
-            # Respect robots.txt and add delay
-            time.sleep(DEFAULT_DELAY * (attempt + 0.5))
+    try:
+        response = make_request(url)
+        soup = BeautifulSoup(response.text, 'html.parser')
+        
+        # Extract profile data using multiple strategies
+        profile_data = extract_profile_data(soup)
+        if profile_data['name']:
+            return profile_data, None
             
-            resp = requests.get(
-                url,
-                headers=headers,
-                timeout=REQUEST_TIMEOUT,
-                allow_redirects=True
-            )
-            
-            # Handle rate limiting
-            if resp.status_code == 429:
-                retry_after = int(resp.headers.get('Retry-After', 30))
-                logger.warning(f"Rate limited. Waiting {retry_after} seconds...")
-                time.sleep(retry_after)
-                continue
-                
-            if resp.status_code != 200:
-                return None, f"HTTP {resp.status_code}"
-                
-            soup = BeautifulSoup(resp.text, 'html.parser')
-            
-            # Extract profile data using multiple strategies
-            profile_data = extract_profile_data(soup)
-            if profile_data['name']:
-                return profile_data, None
-                
-            return None, "No parsable data found"
-            
-        except requests.exceptions.RequestException as e:
-            logger.warning(f"Request failed (attempt {attempt + 1}): {str(e)}")
-            if attempt == retries - 1:
-                return None, f"Request failed: {str(e)}"
-            
-    return None, "Max retries exceeded"
+        return None, "No parsable data found"
+        
+    except Exception as e:
+        return None, str(e)
 
 def extract_profile_data(soup: BeautifulSoup) -> Dict:
     """
@@ -264,6 +479,17 @@ def extract_profile_data(soup: BeautifulSoup) -> Dict:
             data['title'] = job_company[0].strip()
             if len(job_company) > 1:
                 data['company'] = job_company[1].strip()
+    
+    # Strategy 4: New LinkedIn layout
+    if not data['name']:
+        name_element = soup.find('h1', class_='text-heading-xlarge')
+        if name_element:
+            data['name'] = name_element.get_text().strip()
+    
+    if not data['title']:
+        title_element = soup.find('div', class_='text-body-medium')
+        if title_element:
+            data['title'] = title_element.get_text().strip()
     
     return data
 
@@ -449,7 +675,7 @@ def save_results(bookmarks_by_folder: Dict, output_path: str) -> bool:
 def main():
     """Main execution function"""
     parser = argparse.ArgumentParser(
-        description='Convert LinkedIn profile URLs to organized browser bookmarks.',
+        description='Convert LinkedIn profile URLs to organized browser bookmarks with anti-bot protection.',
         epilog='Example: python linkedin_bookmarker.py --input urls.txt --output bookmarks.html'
     )
     parser.add_argument(
@@ -498,7 +724,7 @@ def main():
         sys.exit(0)
     
     try:
-        logger.info("Starting LinkedIn Bookmark Generator")
+        logger.info("Starting LinkedIn Bookmark Generator with anti-bot protection")
         start_time = time.time()
         
         # Load and validate input
@@ -517,6 +743,7 @@ def main():
         bookmarks_by_folder = {}
         failed_urls = []
         processed_count = 0
+        consecutive_failures = 0
         
         # Process URLs with progress bar
         with tqdm(
@@ -541,16 +768,24 @@ def main():
                     })
                     
                     processed_count += 1
+                    consecutive_failures = 0
                     pbar.set_postfix({
                         'success': processed_count,
                         'failed': len(failed_urls)
                     })
                     
-                    time.sleep(args.delay)
+                    # Random delay to mimic human behavior
+                    time.sleep(random.uniform(args.delay, args.delay * 1.5))
                     
                 except Exception as e:
                     logger.error(f"Error processing {url}: {str(e)}")
                     failed_urls.append(url)
+                    consecutive_failures += 1
+                    
+                    if consecutive_failures >= MAX_CONSECUTIVE_FAILURES:
+                        logger.error("Too many consecutive failures, stopping...")
+                        break
+                        
                     if not args.skip_errors:
                         raise
                     continue
