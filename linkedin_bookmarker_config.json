@@ -1,0 +1,5 @@
+{
+  "Sales": ["sales", "account executive"],
+  "Engineering": ["engineer", "developer"],
+  "Executives": ["ceo", "cto", "vp"]
+}

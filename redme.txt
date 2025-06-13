@@ -1,0 +1,1 @@
+python linkedin_bookmarker.py --input urls.txt --output linkedin_bookmarks.html --skip-errors --delay 2

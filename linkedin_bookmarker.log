@@ -1,0 +1,27 @@
+2025-06-13 02:20:42,223 - linkedin_bookmarker - INFO - Starting LinkedIn Bookmark Generator
+2025-06-13 02:20:42,237 - linkedin_bookmarker - INFO - Found 6 URLs in text file
+2025-06-13 02:20:42,237 - linkedin_bookmarker - INFO - Processing 4 valid URLs
+2025-06-13 02:20:42,237 - linkedin_bookmarker - INFO - No config found at C:\Users\alami\.linkedin_bookmarker_config.json, using defaults
+2025-06-13 02:20:45,179 - linkedin_bookmarker - ERROR - Error processing https://www.linkedin.com/in/john-doe-123456: HTTP 999
+2025-06-13 02:21:07,444 - linkedin_bookmarker - WARNING - Request failed (attempt 1): HTTPSConnectionPool(host='www.linkedin.com', port=443): Read timed out. (read timeout=20)
+2025-06-13 02:21:32,060 - linkedin_bookmarker - WARNING - Request failed (attempt 2): HTTPSConnectionPool(host='www.linkedin.com', port=443): Read timed out. (read timeout=20)
+2025-06-13 02:21:59,689 - linkedin_bookmarker - WARNING - Request failed (attempt 3): HTTPSConnectionPool(host='www.linkedin.com', port=443): Read timed out. (read timeout=20)
+2025-06-13 02:21:59,690 - linkedin_bookmarker - ERROR - Error processing https://www.linkedin.com/in/jane-smith-789012: Request failed: HTTPSConnectionPool(host='www.linkedin.com', port=443): Read timed out. (read timeout=20)
+2025-06-13 02:22:20,467 - linkedin_bookmarker - WARNING - Request failed (attempt 1): ('Connection aborted.', ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None))
+2025-06-13 02:22:26,855 - linkedin_bookmarker - ERROR - Error processing https://www.linkedin.com/in/mike-johnson-345678: HTTP 999
+2025-06-13 02:22:30,449 - linkedin_bookmarker - ERROR - Error processing https://www.linkedin.com/in/sarah-williams-901234: HTTP 999
+2025-06-13 02:22:30,455 - linkedin_bookmarker - INFO - Successfully saved 0 bookmarks to linkedin_bookmarks.html
+2025-06-13 02:37:02,952 - linkedin_bookmarker - INFO - Starting LinkedIn Bookmark Generator
+2025-06-13 02:37:02,969 - linkedin_bookmarker - INFO - Found 11 URLs in text file
+2025-06-13 02:37:02,969 - linkedin_bookmarker - INFO - Processing 11 valid URLs
+2025-06-13 02:37:16,243 - linkedin_bookmarker - ERROR - Error processing https://www.linkedin.com/in/sundarpichai: HTTP 999
+2025-06-13 02:37:41,803 - linkedin_bookmarker - ERROR - Error processing https://www.linkedin.com/in/linkedinexpert: HTTP 404
+2025-06-13 02:38:01,597 - linkedin_bookmarker - ERROR - Error processing https://www.linkedin.com/in/al-amin-khan-9996152b5: HTTP 999
+2025-06-13 02:38:01,600 - linkedin_bookmarker - INFO - Successfully saved 8 bookmarks to linkedin_bookmarks.html
+2025-06-13 02:42:17,280 - linkedin_bookmarker - INFO - Starting LinkedIn Bookmark Generator
+2025-06-13 02:42:17,281 - linkedin_bookmarker - INFO - Found 11 URLs in text file
+2025-06-13 02:42:17,281 - linkedin_bookmarker - INFO - Processing 11 valid URLs
+2025-06-13 02:42:36,207 - linkedin_bookmarker - ERROR - Error processing https://www.linkedin.com/in/sundarpichai: HTTP 999
+2025-06-13 02:43:11,003 - linkedin_bookmarker - ERROR - Error processing https://www.linkedin.com/in/linkedinexpert: HTTP 404
+2025-06-13 02:43:29,833 - linkedin_bookmarker - ERROR - Error processing https://www.linkedin.com/in/al-amin-khan-9996152b5: HTTP 999
+2025-06-13 02:43:29,836 - linkedin_bookmarker - INFO - Successfully saved 8 bookmarks to linkedin_bookmarks.html
